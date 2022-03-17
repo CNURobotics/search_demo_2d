@@ -126,7 +126,9 @@ class Node:
     def child_node(self, problem, action):
         """[Figure 3.10]"""
         next_state = problem.result(self.state, action)
-        next_node = Node(next_state, self, action, problem.path_cost(self.path_cost, self.state, action, next_state))
+        next_node = Node(next_state, self, action,
+                         problem.path_cost(self.path_cost, self.state,
+                                           action, next_state))
         return next_node
 
     def solution(self):
@@ -182,7 +184,7 @@ class SimpleProblemSolvingAgentProgram:
             problem = self.formulate_problem(self.state, goal)
             self.seq = self.search(problem)
             if not self.seq:
-                return None
+                return None, None
         return self.seq.pop(0)
 
     def update_state(self, state, percept):
@@ -216,9 +218,9 @@ def breadth_first_tree_search(problem):
     while frontier:
         node = frontier.popleft()
         if problem.goal_test(node.state):
-            return node
+            return node, None
         frontier.extend(node.expand(problem))
-    return None
+    return None, None
 
 
 def depth_first_tree_search(problem):
@@ -235,9 +237,9 @@ def depth_first_tree_search(problem):
     while frontier:
         node = frontier.pop()
         if problem.goal_test(node.state):
-            return node
+            return node, None
         frontier.extend(node.expand(problem))
-    return None
+    return None, None
 
 
 def depth_first_graph_search(problem):
@@ -252,14 +254,16 @@ def depth_first_graph_search(problem):
     frontier = [(Node(problem.initial))]  # Stack
 
     explored = set()
+    max_frontier = 0
     while frontier:
+        max_frontier = max(max_frontier, len(frontier))
         node = frontier.pop()
         if problem.goal_test(node.state):
-            return node
+            return node, max_frontier
         explored.add(node.state)
         frontier.extend(child for child in node.expand(problem)
                         if child.state not in explored and child not in frontier)
-    return None
+    return None, max_frontier
 
 
 def breadth_first_graph_search(problem):
@@ -273,15 +277,17 @@ def breadth_first_graph_search(problem):
         return node
     frontier = deque([node])
     explored = set()
+    max_frontier = 0
     while frontier:
+        max_frontier = max(max_frontier, len(frontier))
         node = frontier.popleft()
         explored.add(node.state)
         for child in node.expand(problem):
             if child.state not in explored and child not in frontier:
                 if problem.goal_test(child.state):
-                    return child
+                    return child, max_frontier
                 frontier.append(child)
-    return None
+    return None, max_frontier
 
 
 def best_first_graph_search(problem, f, display=False):
@@ -1221,8 +1227,8 @@ class GraphProblem(Problem):
         """The result of going to a neighbor is just that neighbor."""
         return action
 
-    def path_cost(self, cost_so_far, A, action, B):
-        return cost_so_far + (self.graph.get(A, B) or np.inf)
+    def path_cost(self, cost_so_far, parent_posn, action, child_posn):
+        return cost_so_far + (self.graph.get(parent_posn, child_posn) or np.inf)
 
     def find_min_edge(self):
         """Find minimum value of edges."""

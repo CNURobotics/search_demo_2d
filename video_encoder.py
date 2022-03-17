@@ -6,7 +6,7 @@ Class for encoding composite video of two consistent images
 
     The MIT License (MIT)
 
-    Copyright (c) 2015 David Conner (david.conner@cnu.edu)
+    Copyright (c) 2015-2022 David Conner (david.conner@cnu.edu)
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ class VideoEncoder:
         self.shape = comp_frame.shape
         print("Composite frame size=",comp_frame.shape)
 
-        if ((len(self.shape) < 3) or (self.shape[2] == None) or (self.shape[2] == 1)):
+        if len(self.shape) < 3 or self.shape[2] == None or self.shape[2] == 1:
             self.comp_frame = cv2.cvtColor(comp_frame, cv2.COLOR_GRAY2RGB)
         else:
             # Assume color image
@@ -52,7 +52,7 @@ class VideoEncoder:
 
         self.video_out = None
         print("Video speed factor = ",self.fps_factor)
-        if (self.fps_factor > 0):
+        if self.fps_factor > 0:
             fourcc = cv2.VideoWriter_fourcc('m','p','4','v') # 'I', 'Y', 'U', 'V') # 'D', 'I', 'V', 'X') #  cv2.VideoWriter_fourcc(*'XVID')
             print("Create video file at ",target_path+'.mp4')
 
@@ -63,7 +63,7 @@ class VideoEncoder:
         else:
             print("No video processing !")
 
-    def addDualFrame(self, expanded_img, cost_img):
+    def add_dual_frame(self, expanded_img, cost_img):
 
         h1 = expanded_img.shape[0]
         w1 = expanded_img.shape[1]
@@ -96,7 +96,7 @@ class VideoEncoder:
             print(msg)
             return False
 
-        if (self.fps_factor > 0):
+        if self.fps_factor > 0:
             try:
                 #print "write frame ..."
                 ret=self.video_out.write(self.comp_frame)
@@ -110,7 +110,7 @@ class VideoEncoder:
 
     def release(self):
         print(" fps factor = ",self.fps_factor)
-        if (self.fps_factor > 0):
+        if self.fps_factor > 0:
             print("Releasing the video capture ...")
             print(" Use\n   avconv -i output.avi -b 1440k test.avi\n to compress output video")
             self.video_out.release()
